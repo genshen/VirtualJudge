@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>正在处理...</title>
+    <script src="../../blog/static/assets/js/main.js"></script>
+</head>
+<body>
+<script>
+    var result = JSON.parse("{{.json }}");
+    if(result && result.status){
+        if(result.status == 1){ //ok
+            window.opener.postMessage(result, location.origin);
+            window.close();
+        }else if(result.status == 2){ //already auth
+            window.alert("你已经处于登录状态了,请勿重复登录");
+            window.close();
+        }
+    }else{
+        window.alert("登录出错了");
+        window.close();
+    }
+</script>
+</body>
+</html>

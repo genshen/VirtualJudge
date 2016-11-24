@@ -9,5 +9,5 @@ func init() {
 	beego.Router("/", &controllers.MainController{})
 	//auth
 	beego.Router("/auth/user_status", &controllers.AuthController{}, "get:GetUserStatus")  //JSON
-	beego.Router("/auth/github/callback", &controllers.AuthController{}, "get:GetUserStatus")  //JSON
+	beego.Router("/auth/callback/github", &controllers.AuthController{}, "get:GithubCallback")
 }

@@ -51,10 +51,19 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
-                    <h4 class="modal-title" id="signInModalLabel">请登录认证后继续操作</h4>
+                    <h4 class="modal-title" id="signInModalLabel">Continue after Authenticated</h4>
                 </div>
                 <div class="modal-body">
-                    <p>Unknown</p>
+                    <ul class="sign-in-items">
+                        <template v-for="(au, key) in config.auth">
+                            <li v-if="au.enable">
+                                <a href="javascript:void(0)" @click="goSignIn(key)">
+                                    <img class="sign-item-logo" :src="au.logo"/>
+                                    <span v-text="au.name"></span>
+                                </a>
+                            </li>
+                        </template>
+                    </ul>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-flat-secondary" data-dismiss="modal">Cancel</button>
@@ -83,7 +92,7 @@
                     <p class="font-weight-light typography-title">Daemonite's Material UI is a cross-platform and fully
                         responsive front-end interface based on Google Material Design, built using Bootstrap 4.</p>
                     <p>
-                        <router-link :to="{ name: 'prolems'}" class="btn btn-lg btn-secondary">Try</router-link>
+                        <router-link :to="{ name: 'problems'}" class="btn btn-lg btn-secondary">Try</router-link>
                     </p>
                     <p class="mb-no text-white-hint typography-caption">Currently v0.0.1-alpha.1</p>
                 </div>
@@ -95,25 +104,94 @@
 <script type="text/x-template" id="template-problems">
     <div class="container">
         <div class="row" style="padding-top:5.5rem">
-            <div class="col-sm-10 col-md-8 offset-sm-1 offset-md-2">
-                <div v-if="!userInfo.is_login" class="alert alert-info" role="alert">
-                    <strong>Heads up!</strong>你尚未登录,点此
-                    <a href="javascript:void(0)" data-target="#sign-in-modal" data-toggle="modal" class="alert-link text-danger">登录</a>
+            <div class="col-md-10 offset-md-1">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>OJ</th>
+                            <th>Problem ID</th>
+                            <th>Title</th>
+                            <th>Ratio(AC/Submit)</th>
+                            <th>Source</th>
+                            <th>Updated</th>
+                        </tr>
+                        <tr class="filter-header">
+                            <td></td>
+                            <td>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        All
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="#">All</a>
+                                        <a class="dropdown-item" href="#">Poj</a>
+                                        <a class="dropdown-item" href="#">Something else here</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="#">Separated link</a>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <input type="password" class="form-control" id="filter-id">
+                            </td>
+                            <td>
+                                <input type="password" class="form-control" id="filter-id">
+                            </td>
+                            <td>
+                                <input type="password" class="form-control" id="filter-id">
+                            </td>
+                            <td>
+                                <input type="password" class="form-control" id="filter-id">
+                            </td>
+                            <td>
+                                <input type="password" class="form-control" id="filter-id">
+                            </td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Column content</td>
+                            <td>Column content</td>
+                            <td>Column content</td>
+                            <td>Column content</td>
+                            <td>Column content</td>
+                            <td>Column content</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Column content</td>
+                            <td>Column content</td>
+                            <td>Column content</td>
+                            <td>Column content</td>
+                            <td>Column content</td>
+                            <td>Column content</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Column content</td>
+                            <td>Column content</td>
+                            <td>Column content</td>
+                            <td>Column content</td>
+                            <td>Column content</td>
+                            <td>Column content</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination">
+                            <li class="page-item"><a href="#">&laquo;</a></li>
+                            <li class="page-item"><a href="#">1</a></li>
+                            <li class="page-item"><a href="#">2</a></li>
+                            <li class="page-item"><a href="#">3</a></li>
+                            <li class="page-item"><a href="#">4</a></li>
+                            <li class="page-item"><a href="#">5</a></li>
+                            <li class="page-item"><a href="#">&raquo;</a></li>
+                        </ul>
+                    </nav>
                 </div>
-                <div v-else class="card">
-                    <div class="card-block">
-                        <h4 class="card-title">Hi,<b v-text="userInfo.name"></b>(<span v-text="userInfo.id"></span>)
-                        </h4>
-                        <h6 class="card-subtitle text-muted">签到日期:2016.10.30 周日</h6>
-                    </div>
-                    <div class="card-block">
-                        <p class="card-text">请点击签到按钮开始签到.</p> <!--你是第7个签到的---->
-                        <button type="button" class="btn btn-secondary">签到</button>
-                    </div>
-                    <div class="card-footer text-muted">
-                        距离签到结束还剩45分0秒
-                    </div>
-                </div><!--/card-->
             </div>
         </div>
     </div>

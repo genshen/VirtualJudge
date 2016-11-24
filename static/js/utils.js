@@ -7,6 +7,7 @@ function Snackbar(t,e,i){""!==t?(this.options=this.activateOptions(e),this.data=
  * 2.base64_decode
  * 3.jquery.cookie.js
  * 4. form post utils
+ * 5 format time
  * */
 
 //base64_decode
@@ -330,3 +331,33 @@ var Util = {
         }
     }
 };
+
+
+function formatTime(value) {
+    if (typeof value != "number") {
+        var v = Date.parse(value);
+        if (isNaN(v)) {
+            value = (new Date).getTime();
+        } else {
+            value = v;
+        }
+    }
+    now = (new Date).getTime();
+    if (now - value < 60 * 1000) {
+        return "刚刚";
+    }
+    if (now - value < 60 * 60 * 1000) {
+        var min = parseInt((now - value) / (60 * 1000));
+        return min + "分钟前";
+    }
+    if (now - value < 24 * 60 * 60 * 1000) {
+        var hour = parseInt((now - value) / (60 * 60 * 1000));
+        return hour + "小时前";
+    }
+    if (now - value < 20 * 24 * 60 * 60 * 1000) {
+        var day = parseInt((now - value) / (24 * 60 * 60 * 1000));
+        return day + "天前";
+    }
+    var d = new Date(value);
+    return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();
+}

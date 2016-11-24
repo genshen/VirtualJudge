@@ -7,13 +7,16 @@ const Config = {
     logo: "https://v4-alpha.getbootstrap.com/assets/brand/bootstrap-solid.svg",
     auth: {
         github: {
+            name: "Github",
+            logo: "/static/img/github.png",
             enable: true,
-            authCallback: "/auth/github_auth/callback"
+            client_id: "94b2759733e24ee2994d",
+            redirect_uri: "http://localhost:8080/auth/callback/github",
+            auth_url: "https://github.com/login/oauth/authorize/?redirect_uri=R&client_id=C",
         }
     }
-    // authUrl: "https://graph.qq.com/oauth/show?which=ConfirmPage&client_id=101363082&response_type=code&scope=get_user_info&state=10.16.55.200"
 };
-var userInfo = {name: "", id: 0, is_login: false};
+var userInfo = {name: "", avatar: "", id: 0, is_login: false};
 
 //init config
 // Config.authUrl += "&redirect_uri=" + Config.authCallback;
@@ -43,7 +46,7 @@ var Home = Vue.extend({
 var Problems = Vue.extend({
     template: '#template-problems',
     data: function () {
-        return {userInfo: userInfo, Problems: []};
+        return {Problems: []};
     },
     methods: {},
     created: function () {
@@ -63,9 +66,12 @@ var app = new Vue({
     router: router,
     data: {config: Config},
     methods: {
-        qqLogin: function () {
-            window.open(Config.authUrl, "Github", "status=no,titlebar=no,toolbar=no,menubar=no");
-            console.log("s");
+        goSignIn: function (key) { //eg:go to github.com
+            var instance = this.config.auth[key];
+            var url = instance.auth_url.replace("R", instance.redirect_uri).replace("C", instance.client_id);
+            // console.log(url);
+            window.open(url, "", "location=no,status=no");
+            $("#sign-in-modal").modal("hide");
         }
     },
     mounted: function () {
@@ -76,6 +82,7 @@ var app = new Vue({
                     if (data.is_login) {
                         userInfo.name = data.name;
                         userInfo.id = data.id;
+                        userInfo.avatar = data.avatar;
                         userInfo.is_login = true;
                     }
                 } catch (e) {
@@ -91,3 +98,16 @@ var app = new Vue({
 // setTimeout(function () {
 //     console.log(app.$refs.app.onLoginSuccess());
 // }, 2000);
+
+window.addEventListener('message', function (e) {
+    if (e.origin == location.origin) {
+        var data = e.data;
+        if (data.status == 1) {
+            userInfo.name = data.name;
+            userInfo.id = data.id;
+            userInfo.avatar = data.avatar;
+            userInfo.is_login = true;
+            new Snackbar("登录认证成功", {timeout: 3500});
+        }
+    }
+});
