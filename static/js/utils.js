@@ -4,60 +4,15 @@ function Snackbar(t,e,i){""!==t?(this.options=this.activateOptions(e),this.data=
 /*util：
  * including:
  * 1.snackbar
- * 2.base64_decode
+ * 2.base64.js
  * 3.jquery.cookie.js
  * 4. form post utils
  * 5 format time
  * */
 
-//base64_decode
-function base64_decode(encodedData) {
-    if (typeof window !== 'undefined') {
-        if (typeof window.atob !== 'undefined') {
-            return decodeURIComponent(unescape(window.atob(encodedData)))
-        }
-    } else {
-        return new Buffer(encodedData, 'base64').toString('utf-8')
-    }
-
-    var b64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-    var o1, o2, o3, h1, h2, h3, h4, bits;
-    var i = 0;
-    var ac = 0;
-    var dec = '';
-    var tmpArr = [];
-
-    if (!encodedData) {
-        return encodedData
-    }
-
-    encodedData += '';
-
-    do {
-        // unpack four hexets into three octets using index points in b64
-        h1 = b64.indexOf(encodedData.charAt(i++));
-        h2 = b64.indexOf(encodedData.charAt(i++));
-        h3 = b64.indexOf(encodedData.charAt(i++));
-        h4 = b64.indexOf(encodedData.charAt(i++));
-
-        bits = h1 << 18 | h2 << 12 | h3 << 6 | h4;
-
-        o1 = bits >> 16 & 0xff;
-        o2 = bits >> 8 & 0xff;
-        o3 = bits & 0xff;
-
-        if (h3 === 64) {
-            tmpArr[ac++] = String.fromCharCode(o1)
-        } else if (h4 === 64) {
-            tmpArr[ac++] = String.fromCharCode(o1, o2)
-        } else {
-            tmpArr[ac++] = String.fromCharCode(o1, o2, o3)
-        }
-    } while (i < encodedData.length);
-
-    dec = tmpArr.join('');
-    return decodeURIComponent(escape(dec.replace(/\0+$/, '')))
-}
+//base64.js
+// https://github.com/dankogai/js-base64
+(function(global){"use strict";var _Base64=global.Base64;var version="2.1.9";var buffer;if(typeof module!=="undefined"&&module.exports){try{buffer=require("buffer").Buffer}catch(err){}}var b64chars="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";var b64tab=function(bin){var t={};for(var i=0,l=bin.length;i<l;i++)t[bin.charAt(i)]=i;return t}(b64chars);var fromCharCode=String.fromCharCode;var cb_utob=function(c){if(c.length<2){var cc=c.charCodeAt(0);return cc<128?c:cc<2048?fromCharCode(192|cc>>>6)+fromCharCode(128|cc&63):fromCharCode(224|cc>>>12&15)+fromCharCode(128|cc>>>6&63)+fromCharCode(128|cc&63)}else{var cc=65536+(c.charCodeAt(0)-55296)*1024+(c.charCodeAt(1)-56320);return fromCharCode(240|cc>>>18&7)+fromCharCode(128|cc>>>12&63)+fromCharCode(128|cc>>>6&63)+fromCharCode(128|cc&63)}};var re_utob=/[\uD800-\uDBFF][\uDC00-\uDFFFF]|[^\x00-\x7F]/g;var utob=function(u){return u.replace(re_utob,cb_utob)};var cb_encode=function(ccc){var padlen=[0,2,1][ccc.length%3],ord=ccc.charCodeAt(0)<<16|(ccc.length>1?ccc.charCodeAt(1):0)<<8|(ccc.length>2?ccc.charCodeAt(2):0),chars=[b64chars.charAt(ord>>>18),b64chars.charAt(ord>>>12&63),padlen>=2?"=":b64chars.charAt(ord>>>6&63),padlen>=1?"=":b64chars.charAt(ord&63)];return chars.join("")};var btoa=global.btoa?function(b){return global.btoa(b)}:function(b){return b.replace(/[\s\S]{1,3}/g,cb_encode)};var _encode=buffer?function(u){return(u.constructor===buffer.constructor?u:new buffer(u)).toString("base64")}:function(u){return btoa(utob(u))};var encode=function(u,urisafe){return!urisafe?_encode(String(u)):_encode(String(u)).replace(/[+\/]/g,function(m0){return m0=="+"?"-":"_"}).replace(/=/g,"")};var encodeURI=function(u){return encode(u,true)};var re_btou=new RegExp(["[À-ß][-¿]","[à-ï][-¿]{2}","[ð-÷][-¿]{3}"].join("|"),"g");var cb_btou=function(cccc){switch(cccc.length){case 4:var cp=(7&cccc.charCodeAt(0))<<18|(63&cccc.charCodeAt(1))<<12|(63&cccc.charCodeAt(2))<<6|63&cccc.charCodeAt(3),offset=cp-65536;return fromCharCode((offset>>>10)+55296)+fromCharCode((offset&1023)+56320);case 3:return fromCharCode((15&cccc.charCodeAt(0))<<12|(63&cccc.charCodeAt(1))<<6|63&cccc.charCodeAt(2));default:return fromCharCode((31&cccc.charCodeAt(0))<<6|63&cccc.charCodeAt(1))}};var btou=function(b){return b.replace(re_btou,cb_btou)};var cb_decode=function(cccc){var len=cccc.length,padlen=len%4,n=(len>0?b64tab[cccc.charAt(0)]<<18:0)|(len>1?b64tab[cccc.charAt(1)]<<12:0)|(len>2?b64tab[cccc.charAt(2)]<<6:0)|(len>3?b64tab[cccc.charAt(3)]:0),chars=[fromCharCode(n>>>16),fromCharCode(n>>>8&255),fromCharCode(n&255)];chars.length-=[0,0,2,1][padlen];return chars.join("")};var atob=global.atob?function(a){return global.atob(a)}:function(a){return a.replace(/[\s\S]{1,4}/g,cb_decode)};var _decode=buffer?function(a){return(a.constructor===buffer.constructor?a:new buffer(a,"base64")).toString()}:function(a){return btou(atob(a))};var decode=function(a){return _decode(String(a).replace(/[-_]/g,function(m0){return m0=="-"?"+":"/"}).replace(/[^A-Za-z0-9\+\/]/g,""))};var noConflict=function(){var Base64=global.Base64;global.Base64=_Base64;return Base64};global.Base64={VERSION:version,atob:atob,btoa:btoa,fromBase64:decode,toBase64:encode,utob:utob,encode:encode,encodeURI:encodeURI,btou:btou,decode:decode,noConflict:noConflict};if(typeof Object.defineProperty==="function"){var noEnum=function(v){return{value:v,enumerable:false,writable:true,configurable:true}};global.Base64.extendString=function(){Object.defineProperty(String.prototype,"fromBase64",noEnum(function(){return decode(this)}));Object.defineProperty(String.prototype,"toBase64",noEnum(function(urisafe){return encode(this,urisafe)}));Object.defineProperty(String.prototype,"toBase64URI",noEnum(function(){return encode(this,true)}))}} })(this);//if(global["Meteor"]){Base64=global.Base64}
 
 //js-cookie
 /*!
@@ -223,7 +178,7 @@ var Util = {
             var options = $.extend({}, {snackBarAlive: 4000,multiError:true, showNext: false, authUrl: this.config.authUrl}, o);
             if (!onError) {
                 onError = function () {
-                    new Snackbar("出了点错误,请<a href='" + window.location.href + "'>刷新</a>重试",
+                    new Snackbar("error happened,please<a href='" + window.location.href + "'>Refresh</a> and try again!",
                         {timeout: options.snackBarAlive});
                 }
             }
@@ -265,7 +220,7 @@ var Util = {
                 }
             };
             try { //cookie may be null or something else bad data
-                xsrf = base64_decode(Cookies.get('_xsrf').split("|")[0]);
+                xsrf = Base64.decode(Cookies.get('_xsrf').split("|")[0]);
             } catch (err) {
                 new Snackbar("会话已过期,请<a href='" + window.location.href + "'>刷新</a>重试", {timeout: options.snackBarAlive});
                 finish(0);
@@ -344,19 +299,19 @@ function formatTime(value) {
     }
     now = (new Date).getTime();
     if (now - value < 60 * 1000) {
-        return "刚刚";
+        return "just now";
     }
     if (now - value < 60 * 60 * 1000) {
         var min = parseInt((now - value) / (60 * 1000));
-        return min + "分钟前";
+        return min + "minutes ago";
     }
     if (now - value < 24 * 60 * 60 * 1000) {
         var hour = parseInt((now - value) / (60 * 60 * 1000));
-        return hour + "小时前";
+        return hour + "hours ago";
     }
     if (now - value < 20 * 24 * 60 * 60 * 1000) {
         var day = parseInt((now - value) / (24 * 60 * 60 * 1000));
-        return day + "天前";
+        return day + "days ago";
     }
     var d = new Date(value);
     return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();

@@ -6,15 +6,15 @@ import (
 )
 
 func init() {
-	orm.RegisterModel(new(User))
+	orm.RegisterModel(new(User), new(Problem), new(ProblemDetail))
 }
 
-const(
+const (
 	UserTableName = "user"
 )
 //one table is enough
 type User struct {
-	Id           int64         `json:"id"`
+	Id           int           `json:"id"`
 	Name         string        `json:"name"`
 	Avatar       string        `json:"avatar"`
 	Email        string        `json:"email"`

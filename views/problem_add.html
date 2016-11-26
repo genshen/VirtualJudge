@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Virtual Judge·Add Problem</title>
+    <link href="/static/dist/css/material.min.css" rel="stylesheet">
+    <link href="/static/css/main.css" rel="stylesheet">
+</head>
+<body>
+<main id="app">
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-10 col-xl-8 offset-md-1 offset-xl-2">
+                <h1>Add Problem</h1>
+                <div class="form-group">
+                    <label for="oj-select">Email</label>
+                    <select id="oj-select" v-model="oj" class="custom-select">
+                        <option value="1">Poj</option>
+                    </select>
+                    <small id="ojHelp" class="form-text text-muted">select one oj.</small>
+                </div>
+                <div class="form-group">
+                    <label for="inputPassword">Problem Id</label>
+                    <input type="number" class="form-control" id="inputPassword"
+                           v-model="problem_id" placeholder="problem id must be an integer">
+                </div>
+                <button @click="onSubmit" type="submit" class="btn btn-primary">Submit</button>
+            </div>
+        </div>
+    </div>
+</main>
+<script src="/static/dist/js/jquery.min.js"></script>
+<script src="/static/dist/js/tether.min.js"></script>
+<script src="/static/dist/js/bootstrap.min.js"></script>
+<script src="/static/dist/js/material.min.js"></script>
+<script src="/static/dist/js/vue.min.js"></script>
+<script src="/static/js/utils.js"></script>
+<script>
+    new Vue({
+        el: "#app",
+        data: {oj: 1, problem_id: 1000},
+        methods: {
+            onSubmit: function () { //todo oj range?
+                if (this.oj > 0 && this.oj <= 1) {
+                    Util.postData.init("/problem/add/", {oj_type: this.oj, problem_id: this.problem_id},{multiError:false},function(){
+                        new Snackbar("Congratulations! problem added", {timeout:3500});
+                    });
+                }else{
+                    new Snackbar("error oj type or problem id", {timeout: 3500});
+                }
+            }
+        }
+    })
+</script>
+</body>
+</html>
