@@ -1,0 +1,12 @@
+{
+  "POJ": {
+    "enable": true,
+    "name": "POJ",
+    "accounts": [
+      {
+        "id": "41355059",
+        "password": "9029787891"
+      }
+    ]
+  }
+}

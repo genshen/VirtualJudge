@@ -4,6 +4,7 @@ import "time"
 
 const(
 	ProblemTableName = "problem"
+	ProblemDetailTableName = "problem_detail"
 )
 
 type Problem struct {
@@ -38,4 +39,8 @@ type ProblemDetail struct {
 
 func (u *Problem) TableName() string {
 	return ProblemTableName
+}
+
+func (u *ProblemDetail) TableName() string {
+	return ProblemDetailTableName
 }

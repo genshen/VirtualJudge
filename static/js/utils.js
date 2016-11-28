@@ -287,7 +287,6 @@ var Util = {
     }
 };
 
-
 function formatTime(value) {
     if (typeof value != "number") {
         var v = Date.parse(value);
@@ -303,15 +302,15 @@ function formatTime(value) {
     }
     if (now - value < 60 * 60 * 1000) {
         var min = parseInt((now - value) / (60 * 1000));
-        return min + "minutes ago";
+        return min + "minute(s) ago";
     }
     if (now - value < 24 * 60 * 60 * 1000) {
         var hour = parseInt((now - value) / (60 * 60 * 1000));
-        return hour + "hours ago";
+        return hour + "hour(s) ago";
     }
     if (now - value < 20 * 24 * 60 * 60 * 1000) {
         var day = parseInt((now - value) / (24 * 60 * 60 * 1000));
-        return day + "days ago";
+        return day + "day(s) ago";
     }
     var d = new Date(value);
     return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();

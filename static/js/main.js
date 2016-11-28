@@ -14,12 +14,15 @@ const Config = {
             redirect_uri: "http://localhost:8080/auth/callback/github",
             auth_url: "https://github.com/login/oauth/authorize/?redirect_uri=R&client_id=C",
         }
-    }
+    },
+    //homePage do not end with "/"
+    OJs: [{name: "Local", homePage: ""}, {name: "POJ", homePage: "http://poj.org"}]
 };
 var userInfo = {name: "", avatar: "", id: 0, is_login: false};
 
 //init config
 // Config.authUrl += "&redirect_uri=" + Config.authCallback;
+Vue.filter('formatTime', formatTime);
 
 var Home = Vue.extend({
     template: '#template-home',
@@ -46,11 +49,66 @@ var Home = Vue.extend({
 var Problems = Vue.extend({
     template: '#template-problems',
     data: function () {
-        return {Problems: []};
+        return {problems: [], ojs: Config.OJs};
     },
-    methods: {},
+    methods: {
+        OJName: function (type) {
+            return getOJNameByType(type);
+        }, formatUpdatedAt: function (time) {
+            return formatTime(time);
+        }, sourceUrl: function (type, url) {
+            return formatSourceUrl(type, url)
+        },
+        //
+        filterProblemsByOj: function (index) { //remember set button text
+            console.log(index);
+        }
+    },
     created: function () {
+        $.ajax({
+            url: Config.base + "problems",
+            context: this,
+            success: function (data) {
+                try {
+                    var self = this;
+                    data.forEach(function (e) {
+                        self.problems.push(e)
+                    });
+                } catch (e) {
+                    new Snackbar("error happened while loading problema data.", {timeout: 3500});
+                }
+            }, error: function (err) {
+                new Snackbar("error happened while loading problems data.", {timeout: 3500});
+            }
+        });
+    }
+});
 
+var ProblemDetail = Vue.extend({
+    template: "#template-problem-detail",
+    methods: {},
+    data: function () {
+        return {detail: {}, ojs: Config.OJs};
+    },
+    created: function () {
+        var id = this.$route.params.id;
+        $.ajax({
+            url: Config.base + "problem/"+id,
+            context: this,
+            success: function (data) {
+                //todo may be null
+                try {
+                    var self = this;
+                    data.forEach(function (e) {
+                        self.problems.push(e);
+                    });
+                } catch (e) {
+                    new Snackbar("error happened while loading problema data.", {timeout: 3500});
+                }
+            }, error: function (err) {
+                new Snackbar("error happened while loading problems data.", {timeout: 3500});
+            }
+        });
     }
 });
 
@@ -58,7 +116,8 @@ const router = new VueRouter({
     base: Config.base,
     routes: [
         {path: '/', name: 'home', component: Home},
-        {path: '/problems', name: 'problems', component: Problems}
+        {path: '/problems', name: 'problems', component: Problems},
+        {path: '/problem/:id', name: 'detail', component: ProblemDetail}
     ]
 });
 
@@ -111,3 +170,25 @@ window.addEventListener('message', function (e) {
         }
     }
 });
+
+function getOJNameByType(type) {
+    if (type < Config.OJs.length && type >= 0) {
+        return Config.OJs[type].name;
+    } else {
+        return "Unknown";
+    }
+}
+
+function formatSourceUrl(type, url) {
+    if (url == "" || url.indexOf("http") == 0) {
+        return url;
+    }
+    if (type < Config.OJs.length && type >= 0) {
+        if (url.indexOf("/") != 0) {
+            url = "/" + url;
+        }
+        return Config.OJs[type].homePage + url;
+    } else {
+        return "#";
+    }
+}

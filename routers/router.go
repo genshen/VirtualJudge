@@ -6,10 +6,12 @@ import (
 )
 
 func init() {
-	beego.Router("/", &controllers.MainController{})
+	beego.Router("/", &controllers.MainController{}, "get:Home")
 	//auth
 	beego.Router("/auth/user_status", &controllers.AuthController{}, "get:GetUserStatus")  //JSON
 	beego.Router("/auth/callback/github", &controllers.AuthController{}, "get:GithubCallback")
 
-	beego.Router("/problem/add", &controllers.MainController{}, "get,post:AddProblem")
+	beego.Router("/problems", &controllers.ProblemController{}, "get:Problems")
+	beego.Router("/problem/:id([0-9]+)", &controllers.ProblemController{}, "get:Detail")
+	beego.Router("/problem/add", &controllers.ProblemController{}, "get,post:AddProblem")
 }

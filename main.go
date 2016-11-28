@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "gensh.me/VirtualJudge/routers"
+	_ "gensh.me/VirtualJudge/components/crawler/accounts"
 	"github.com/astaxie/beego"
 )
 

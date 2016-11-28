@@ -1,6 +1,9 @@
 package problem
 
-import "qiniupkg.com/x/errors.v7"
+import (
+	"errors"
+	"gensh.me/VirtualJudge/components/crawler/utils"
+)
 
 type ProblemMeta struct {
 	Title        string
@@ -21,17 +24,12 @@ type ProblemCrawler interface {
 	RequestProblem(proId string) (*ProblemMeta, error)
 }
 
-const (
-	Self = iota
-	POJ
-)
-
 func CrawlerProblem(id string, ojType int8) (*ProblemMeta, error) {
 	var pc ProblemCrawler
 	switch ojType {
 	//case Self:
-	case POJ:
-		pc = PojCrawler{}
+	case utils.POJ:
+		pc = PojProblemCrawler{}
 	default:
 		return &ProblemMeta{}, errors.New("no OJ matched")
 	}

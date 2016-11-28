@@ -121,62 +121,38 @@
                             <td></td>
                             <td>
                                 <div class="btn-group">
-                                    <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        All
-                                    </button>
+                                    <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">All</button>
                                     <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="#">All</a>
-                                        <a class="dropdown-item" href="#">Poj</a>
-                                        <a class="dropdown-item" href="#">Something else here</a>
-                                        <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item" href="#">Separated link</a>
+                                        <a @click="filterProblemsByOj(-1)" class="dropdown-item" href="javascript:void(0)">All</a>
+                                        <a v-for="(oj,key) in ojs" @click="filterProblemsByOj(key)" v-text="oj.name" class="dropdown-item" href="javascript:void(0)"></a>
                                     </div>
                                 </div>
                             </td>
                             <td>
-                                <input type="password" class="form-control" id="filter-id">
+                                <input type="password" class="form-control">
                             </td>
                             <td>
-                                <input type="password" class="form-control" id="filter-id">
+                                <input type="password" class="form-control">
                             </td>
-                            <td>
-                                <input type="password" class="form-control" id="filter-id">
-                            </td>
-                            <td>
-                                <input type="password" class="form-control" id="filter-id">
-                            </td>
-                            <td>
-                                <input type="password" class="form-control" id="filter-id">
-                            </td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
                         </tr>
                         </thead>
                         <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>Column content</td>
-                            <td>Column content</td>
-                            <td>Column content</td>
-                            <td>Column content</td>
-                            <td>Column content</td>
-                            <td>Column content</td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>Column content</td>
-                            <td>Column content</td>
-                            <td>Column content</td>
-                            <td>Column content</td>
-                            <td>Column content</td>
-                            <td>Column content</td>
-                        </tr>
-                        <tr>
-                            <td>3</td>
-                            <td>Column content</td>
-                            <td>Column content</td>
-                            <td>Column content</td>
-                            <td>Column content</td>
-                            <td>Column content</td>
-                            <td>Column content</td>
+                        <tr v-for="(problem,index) in problems">
+                            <td v-text="index"></td>
+                            <td v-text="OJName(problem.oj)">Column content</td>
+                            <td v-text="problem.origin_id"></td>
+                            <td>
+                                <router-link :to="{ name: 'detail',params:{id:problem.id}}" v-text="problem.title"></router-link>
+                            </td>
+                            <td v-text="problem.ac_count+'/'+problem.submitted_count"></td>
+                            <td>
+                                <a :href="sourceUrl(problem.oj,problem.source_url)" v-text="problem.source" target="_blank" ></a>
+                            </td>
+                            <td v-text="formatUpdatedAt(problem.updated_at)"></td>
                         </tr>
                         </tbody>
                     </table>
@@ -192,6 +168,14 @@
                         </ul>
                     </nav>
                 </div>
+            </div>
+        </div>
+    </div>
+</script>
+<script type="text/x-template" id="template-problem-detail">
+    <div class="container">
+        <div class="row" style="padding-top:5.5rem">
+            <div class="col-md-10 offset-md-1">
             </div>
         </div>
     </div>

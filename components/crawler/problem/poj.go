@@ -1,10 +1,10 @@
 package problem
 
 import (
-	"github.com/astaxie/beego/httplib"
-	"gensh.me/VirtualJudge/components/utils"
 	"regexp"
-	"qiniupkg.com/x/errors.v7"
+	"errors"
+	"github.com/astaxie/beego/httplib"
+	"gensh.me/VirtualJudge/components/crawler/utils"
 )
 //var r = regexp.MustCompile(`[\S|\s]+?ptt[\S|\s]+?>([\S|\s]*?)</div>[\S|\s]+?plm[\S|\s]+?</b>([\S|\s]*?)</td>[\S|\s]+?</b>([\S|\s]*?)</td>[\S|\s]+?ptx[\S|\s]+?>([\S|\s]*?)</div><p class="pst">[\S|\s]+?ptx[\S|\s]+?>([\S|\s]*?)</div><p class="pst">[\S|\s]+?ptx[\S|\s]+?>([\S|\s]*?)</div><p class="pst">[\S|\s]+?sio">([\S|\s]*?)</pre><p class="pst">[\S|\s]+?sio">([\S|\s]*?)</pre><p class="pst">[\S|\s]+?ptx[\S|\s]+?>([\S|\s]*?)</div>`)
 //var r2 = regexp.MustCompile(`[\S|\s]+?ptt[\S|\s]+?>([\S|\s]*?)</div>[\S|\s]+?plm[\S|\s]+?</b>([\S|\s]*?)</td>[\S|\s]+?</b>([\S|\s]*?)</td>[\S|\s]+?ptx[\S|\s]+?>([\S|\s]+?)</div><p class="pst">[\S|\s]+?ptx[\S|\s]+?>([\S|\s]*?)</div><p class="pst">[\S|\s]+?ptx[\S|\s]+?>([\S|\s]*?)</div><p class="pst">[\S|\s]+?sio">([\S|\s]*?)</pre><p class="pst">[\S|\s]+?sio">([\S|\s]*?)</pre><p class="pst">[\S|\s]+?ptx[\S|\s]+?>([\S|\s]*?)</pre></div><p class="pst">[\S|\s]+?ptx[\S|\s]+?>([\S|\s]*?)</div>`)
@@ -15,11 +15,11 @@ const (
 
 var sourceRegexp = regexp.MustCompile(`<a href="([\S|\s]*?)">([\S|\s]*?)</a>`)
 
-type PojCrawler struct {
+type PojProblemCrawler struct {
 
 }
 
-func (p PojCrawler)RequestProblem(problemId string) (*ProblemMeta, error) {
+func (p PojProblemCrawler)RequestProblem(problemId string) (*ProblemMeta, error) {
 	problemMeta := ProblemMeta{OriginUrl:pojDomain + problemId}
 	s, err := httplib.Get(problemMeta.OriginUrl).Debug(true).String()
 	if err != nil {
