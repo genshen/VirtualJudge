@@ -19,13 +19,14 @@ return 0;
 }
 */
 func (s *SubmitController)Submit() {
-	language,err := s.GetInt8("language")
-	problemId,err_ := s.GetInt8("problem_id")
-	if err == nil && err_==nil{
-		submitForm := submit.SubmitForm{Language:language,ProblemId:problemId,Code:s.GetString("code")}
-		submitForm.Valid()
-	}else{
-		s.Data["json"] = utils.SimpleJsonResponse{Status:0,Error:"error parsing submitted data"}
+	language, err := s.GetInt8("language")
+	problemId, err_ := s.GetInt("problem_id")
+	if err == nil && err_ == nil {
+		submitForm := submit.SubmitForm{Language:language, ProblemId:problemId, Code:s.GetString("code")}
+		response := submitForm.Valid()
+		s.Data["json"] = response
+	} else {
+		s.Data["json"] = utils.SimpleJsonResponse{Status:0, Error:"error parsing submitted data"}
 	}
 	s.ServeJSON()
 }

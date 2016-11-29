@@ -148,7 +148,7 @@ var Submit = Vue.extend({
             var self = this;
             Util.postData.init(Config.base+"submit",{
                 code:Base64.encode(this.code),language:this.language,problem_id:this.$route.params.id
-            },null,function(data){
+            },{multiError:false},function(data){
                 new Snackbar("source code submitted,waiting for judge.", {timeout: 3500});
                 self.code = "";
             },null,null,null,function(){//submitted but error

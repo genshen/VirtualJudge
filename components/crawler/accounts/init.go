@@ -10,12 +10,15 @@ import (
 )
 
 type AccountInterface interface {
-	LoginAccount(accountIndex int8) error
+	LoginAccount(*Account) error
+	LoginAccountByIndex(accountIndex uint) error
+	GetAvailableAccount() (uint,*Account)
 }
 
 type Account struct {
 	Username string
 	Password string
+	Tasks    uint
 	Session  string
 }
 
@@ -65,7 +68,7 @@ func init() {
 				Accounts:[]Account{}}
 			for _, v := range ojValue.Accounts {
 				//add all account to one oj
-				oj.Accounts = append(oj.Accounts, Account{Username:v.Id, Password:v.Password, Session:""})
+				oj.Accounts = append(oj.Accounts, Account{Username:v.Id, Password:v.Password, Tasks:0, Session:""})
 			}
 			OJs = append(OJs, oj)
 		} else {
@@ -76,13 +79,14 @@ func init() {
 
 /*
 ojType:match with crawler/utils/values.go->const
+all interface function will be visited by this interface,so don't always judge the array index in interface function
 */
-func LoginAccountByOjType(ojType, accountIndex int8) (error) {
-	if ojType < int8(len(OJs)) && ojType >= 0 && OJs[ojType - 1].Enable {
-		aif := OJs[ojType - 1].AccountInterface
-		if accountIndex < int8(len(OJs[ojType - 1].Accounts)) && accountIndex >= 0 {
-			return aif.LoginAccount(accountIndex)
-		}
+func GetInterfaceByOjType(ojType int) (AccountInterface, error) {
+	if index := ojType - 1; index < len(OJs) && index >= 0 && OJs[index].Enable {
+		return OJs[index].AccountInterface, nil
+		//if accountIndex < int8(len(OJs[ojType - 1].Accounts)) && accountIndex >= 0 {
+		//	return aif.LoginAccount(accountIndex)
+		//}
 	}
-	return errors.New("no account found")
+	return nil, errors.New("no oj resource found") // no account found
 }

@@ -2,7 +2,6 @@ package problem
 
 import (
 	"errors"
-	"gensh.me/VirtualJudge/components/crawler/utils"
 )
 
 type ProblemMeta struct {
@@ -24,15 +23,16 @@ type ProblemCrawler interface {
 	RequestProblem(proId string) (*ProblemMeta, error)
 }
 
-func CrawlerProblem(id string, ojType int8) (*ProblemMeta, error) {
+//remember to follow the order in crawler/utils/values.go->const
+var problemCrawlerInterfaces = []ProblemCrawler{new(PojProblemCrawler)}
+
+func CrawlerProblem(id string, ojType int) (*ProblemMeta, error) {
 	var pc ProblemCrawler
-	switch ojType {
-	//case Self:
-	case utils.POJ:
-		pc = PojProblemCrawler{}
-	default:
+	if index := ojType - 1;index < len(problemCrawlerInterfaces) && index >= 0 {
+		// 0 means Local problems
+		pc = problemCrawlerInterfaces[index]
+		return pc.RequestProblem(id)
+	} else {
 		return &ProblemMeta{}, errors.New("no OJ matched")
 	}
-	return pc.RequestProblem(id)
-
 }

@@ -21,7 +21,7 @@ func (p *ProblemAddMeta)ValidAndSave() (*utils.SimpleJsonResponse) {
 	if err != nil && err_ != nil {
 		return &utils.SimpleJsonResponse{Status:0, Error:"error oj type or error problem id"}
 	}
-	pm, err_c := problem.CrawlerProblem(p.ProblemId, int8(ty))
+	pm, err_c := problem.CrawlerProblem(p.ProblemId,int(ty))
 
 	if err_c != nil {
 		return &utils.SimpleJsonResponse{Status:0, Error:err_c.Error()}

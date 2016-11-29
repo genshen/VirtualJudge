@@ -10,7 +10,7 @@ import (
 
 type SubmitForm struct {
 	Code      string
-	Language  int
+	Language  int8
 	ProblemId int
 }
 
@@ -24,6 +24,7 @@ const (
 )
 
 func (s *SubmitForm)Valid() (response *utils.SimpleJsonResponse) {
+	response = &utils.SimpleJsonResponse{}
 	response.Status = 0
 	if s.Code == "" {
 		response.Error = "source code can not be blank"
@@ -34,20 +35,25 @@ func (s *SubmitForm)Valid() (response *utils.SimpleJsonResponse) {
 	}
 
 	//get problem by problem id
-	problem := models.Problem{Id:s.ProblemId}
-	err := database.O.Read(&problem, "id", "oj", "origin_id")
+	problem := models.Problem{}
+	err := database.O.QueryTable(models.ProblemTableName).Filter("id", s.ProblemId).One(&problem, "id", "oj", "origin_id")
 	if err == orm.ErrNoRows {
 		response.Error = "problem not exists"
 	} else if err == orm.ErrMissPK {
 		//can remove this case.
 		response.Error = "inner serve error"
 	} else {
-		if err := submitter.SubmitProblem(problem.Oj, problem.OriginId); err != nil {
+		if err := submitter.SubmitProblem(int(problem.Oj), problem.OriginId, s.Language, s.Code, onSubmitResult); err != nil {
 			//has summit error,eg: network,error password
 			response.Error = err.Error()
 		} else {
+			//todo add submit to database
 			response.Status = 1
 		}
 	}
+	return
+}
+
+func onSubmitResult() {
 	return
 }
