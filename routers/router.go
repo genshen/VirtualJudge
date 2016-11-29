@@ -12,6 +12,9 @@ func init() {
 	beego.Router("/auth/callback/github", &controllers.AuthController{}, "get:GithubCallback")
 
 	beego.Router("/problems", &controllers.ProblemController{}, "get:Problems")
-	beego.Router("/problem/:id([0-9]+)", &controllers.ProblemController{}, "get:Detail")
+	beego.Router("/problem/detail/:id([0-9]+)", &controllers.ProblemController{}, "get:Detail")
+	beego.Router("/problem/summary/:id([0-9]+)", &controllers.ProblemController{}, "get:Summary")
 	beego.Router("/problem/add", &controllers.ProblemController{}, "get,post:AddProblem")
+
+	beego.Router("/submit", &controllers.SubmitController{}, "post:Submit")
 }

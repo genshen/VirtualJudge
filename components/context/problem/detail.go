@@ -3,6 +3,7 @@ package problem
 import (
 	"gensh.me/VirtualJudge/models/database"
 	"github.com/astaxie/beego/orm"
+	"gensh.me/VirtualJudge/models"
 )
 
 const SQL = "select * from problem " +
@@ -13,7 +14,6 @@ const SQL = "select * from problem " +
 
 func LoadProblemDetail(id int) *orm.Params {
 	//problem := make(map[string]interface{})
-
 	var problems []orm.Params
 	num, err := database.O.Raw(SQL,id).Values(&problems)
 	if err == nil && num > 0 {
@@ -23,4 +23,10 @@ func LoadProblemDetail(id int) *orm.Params {
 	//err := database.O.Raw(SQL,id).QueryRow(&problem)
 	//err := database.O.QueryTable(models.ProblemDetailTableName).Filter("id", id).One(&problem)
 	return nil
+}
+
+func LoadProblemSummary(id int) *models.Problem {
+	summary := models.Problem{Id:id}
+	database.O.Read(&summary)
+	return &summary
 }

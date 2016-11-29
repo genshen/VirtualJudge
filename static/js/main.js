@@ -4,7 +4,7 @@
 const Config = {
     base: "/",
     appName: "Virtual Judge",
-    logo: "https://v4-alpha.getbootstrap.com/assets/brand/bootstrap-solid.svg",
+    logo: "/static/img/logo.png",
     auth: {
         github: {
             name: "Github",
@@ -69,6 +69,9 @@ var Problems = Vue.extend({
             url: Config.base + "problems",
             context: this,
             success: function (data) {
+                if (data == null) {
+                    data = [];
+                }
                 try {
                     var self = this;
                     data.forEach(function (e) {
@@ -87,23 +90,86 @@ var Problems = Vue.extend({
 var ProblemDetail = Vue.extend({
     template: "#template-problem-detail",
     methods: {},
+    computed: {
+        ojName: function () {
+            return getOJNameByType(this.detail.oj);
+        }, formatUpdatedAt: function () {
+            return formatTime(this.detail.updated_at);
+        }, sourceUrl: function () {
+            return formatSourceUrl(this.detail.oj, this.detail.source_url);
+        }
+    },
     data: function () {
-        return {detail: {}, ojs: Config.OJs};
+        return {detail: {}, loading_status: -1, ojs: Config.OJs}; //-1 is not loaded,0 loading,1:loaded, 2:error loading,3:not found
     },
     created: function () {
         var id = this.$route.params.id;
+        this.loading_status = 0;
         $.ajax({
-            url: Config.base + "problem/"+id,
+            url: Config.base + "problem/detail/" + id,
             context: this,
             success: function (data) {
-                //todo may be null
-                try {
-                    var self = this;
-                    data.forEach(function (e) {
-                        self.problems.push(e);
-                    });
-                } catch (e) {
-                    new Snackbar("error happened while loading problema data.", {timeout: 3500});
+                if (data != null) {
+                    try {
+                        this.detail = data;
+                        /*"id","problem_id","title","describe","hint","input","input_sample", "output","output_sample",
+                         "ac_count","submitted_count","mem_limit","time_limit","oj","origin_id","origin_url",
+                         "source","source_url","created_at","updated_at":*/
+                        this.loading_status = 1;
+                    } catch (e) {
+                        new Snackbar("error happened while loading problema data.", {timeout: 3500});
+                        this.loading_status = 2;
+                    }
+                } else {
+                    this.loading_status = 3; //not found
+                }
+            }, error: function (err) {
+                this.loading_status = 2;
+                new Snackbar("error happened while loading problems data.", {timeout: 3500});
+            }
+        });
+    }
+});
+
+var Submit = Vue.extend({
+    template:"#template-problem-submit",
+    data:function(){
+        return {summary: {},language:0,code:"",submit_status:1,user:userInfo};
+    },
+    methods: {
+        onLoginSuccess:function(){
+            console.log("Success");
+        },submit:function () {
+            if(!this.code){
+                new Snackbar("source code can not be blank.", {timeout: 3500});
+                return;
+            }
+            this.submit_status = 0; //submitting
+            var self = this;
+            Util.postData.init(Config.base+"submit",{
+                code:Base64.encode(this.code),language:this.language,problem_id:this.$route.params.id
+            },null,function(data){
+                new Snackbar("source code submitted,waiting for judge.", {timeout: 3500});
+                self.code = "";
+            },null,null,null,function(){//submitted but error
+                self.submit_status = 1;
+            });
+
+        }
+    }, mounted:function () {
+    },created: function () {
+        var id = this.$route.params.id;
+        this.summary.id = id;
+        $.ajax({
+            url: Config.base + "problem/summary/" + id,
+            context: this,
+            success: function (data) {
+                if (data != null) {
+                    try {
+                        this.summary = data;
+                    } catch (e) {
+                        new Snackbar("error happened while loading problema data.", {timeout: 3500});
+                    }
                 }
             }, error: function (err) {
                 new Snackbar("error happened while loading problems data.", {timeout: 3500});
@@ -117,7 +183,8 @@ const router = new VueRouter({
     routes: [
         {path: '/', name: 'home', component: Home},
         {path: '/problems', name: 'problems', component: Problems},
-        {path: '/problem/:id', name: 'detail', component: ProblemDetail}
+        {path: '/problem/:id', name: 'detail', component: ProblemDetail},
+        {path: '/submit/:id', name: 'submit', component: Submit}
     ]
 });
 
@@ -145,10 +212,10 @@ var app = new Vue({
                         userInfo.is_login = true;
                     }
                 } catch (e) {
-                    new Snackbar("加载数据出错啦,请刷新重试.", {timeout: 3500});
+                    new Snackbar("error loading website data.", {timeout: 3500});
                 }
             }, error: function (err) {
-                new Snackbar("加载数据出错啦,请刷新重试.", {timeout: 3500});
+                new Snackbar("error loading website data.", {timeout: 3500});
             }
         });
     }
@@ -167,6 +234,9 @@ window.addEventListener('message', function (e) {
             userInfo.avatar = data.avatar;
             userInfo.is_login = true;
             new Snackbar("登录认证成功", {timeout: 3500});
+            if(app.$refs.app.onLoginSuccess){ //callback
+                app.$refs.app.onLoginSuccess()
+            }
         }
     }
 });
@@ -180,6 +250,9 @@ function getOJNameByType(type) {
 }
 
 function formatSourceUrl(type, url) {
+    if (url == undefined) {
+        return "";
+    }
     if (url == "" || url.indexOf("http") == 0) {
         return url;
     }

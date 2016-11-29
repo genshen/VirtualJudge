@@ -9,7 +9,7 @@ const(
 
 type Problem struct {
 	Id             int                `json:"id"`
-	ProblemDetail  *ProblemDetail     `orm:"reverse(one)"`
+	ProblemDetail  *ProblemDetail     `orm:"reverse(one)" json:"problem_detail"`
 	Title          string             `json:"title"`
 	OriginUrl      string             `json:"origin_url"`
 	Oj             int8               `json:"oj"`
