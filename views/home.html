@@ -226,7 +226,8 @@
             <div class="col-md-10 offset-md-1">
                 <p>
                     <router-link :to="{ name: 'submit',params:{id:detail.problem_id}}"
-                                 class="btn btn-primary btn-lg">Submit</router-link>
+                                 class="btn btn-primary btn-lg">Submit
+                    </router-link>
                     <a class="btn btn-lg btn-flat-info" href="#">Status</a>
                 </p>
             </div>
@@ -259,7 +260,8 @@
                               placeholder="Enter your code">
                     </textarea>
                 </div>
-                <button type="button" @click="submit" :disabled="submit_status!=1" v-text="submit_status==1?'Submit':'Submitting'" class="btn btn-primary"></button>
+                <button type="button" @click="submit" :disabled="submit_status!=1"
+                        v-text="submit_status==1?'Submit':'Submitting'" class="btn btn-primary"></button>
             </div>
             <div class="col-md-3 hidden-sm-down">
                 <div class="card card-block">
@@ -272,13 +274,16 @@
                         <span>AC/Submitted:</span><b v-text="summary.ac_count"></b><b>/</b><b
                             v-text="summary.submitted_count"></b>.
                     </p>
-                    <router-link :to="{ name: 'detail',params:{id:summary.id}}" class="card-link">See Problem Detail</router-link>
+                    <router-link :to="{ name: 'detail',params:{id:summary.id}}" class="card-link">See Problem Detail
+                    </router-link>
                 </div>
             </div>
         </div> <!---/row--->
         <div v-else class="row padding-container">
-            you are not login.Click here to
-            <a href="javascript:void(0)" data-toggle="modal" data-target="#sign-in-modal">Login</a>
+            <div class="col-md-7 offset-md-1">
+                you are not login.Click here to
+                <a href="javascript:void(0)" data-toggle="modal" data-target="#sign-in-modal">Login</a>
+            </div>
         </div>
     </div>
 </script>

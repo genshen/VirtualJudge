@@ -12,14 +12,13 @@ import (
 type AccountInterface interface {
 	LoginAccount(*Account) error
 	LoginAccountByIndex(accountIndex uint) error
-	GetAvailableAccount() (uint,*Account)
+	GetAvailableAccount() (uint, *Account)
 }
 
 type Account struct {
 	Username string
 	Password string
-	Tasks    uint
-	Session  string
+	Index    uint
 }
 
 type OJ struct {
@@ -61,6 +60,7 @@ func init() {
 	// (eg:OJ_NAMES[utils.POJ-1] == "POJ")
 	var OJ_NAMES = []string{"POJ", "HOJ"}
 	var OJ_ACCOUNT_INTERFACE = []AccountInterface{new(PojAccountInterface)}
+	var ind uint = 0
 	for index, v := range OJ_NAMES {
 		if ojValue, ok := oj_config[v]; ok &&len(ojValue.Accounts) != 0 {
 			//add this oj information to variable OJs
@@ -68,13 +68,15 @@ func init() {
 				Accounts:[]Account{}}
 			for _, v := range ojValue.Accounts {
 				//add all account to one oj
-				oj.Accounts = append(oj.Accounts, Account{Username:v.Id, Password:v.Password, Tasks:0, Session:""})
+				oj.Accounts = append(oj.Accounts, Account{Username:v.Id, Password:v.Password, Index:ind})
+				ind++
 			}
 			OJs = append(OJs, oj)
 		} else {
 			OJs = append(OJs, OJ{Enable:false, Name:v, Accounts:[]Account{}})
 		}
 	}
+	initSessions(ind)
 }
 
 /*

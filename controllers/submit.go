@@ -9,15 +9,6 @@ type SubmitController struct {
 	BaseController
 }
 
-/**
-#include "stdio.h"
-int main(){
-int a,b;
-scanf("%d%d",&a,&b);
-printf("%d",a+b);
-return 0;
-}
-*/
 func (s *SubmitController)Submit() {
 	language, err := s.GetInt8("language")
 	problemId, err_ := s.GetInt("problem_id")

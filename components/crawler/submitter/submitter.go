@@ -6,7 +6,7 @@ import (
 )
 
 type SubmitInterface interface {
-	RemoteSubmit(account *accounts.Account, problemId string, language  int8, code  string) error
+	RemoteSubmit(session string, problemId string, language  int8, code  string) error
 	GetLanguageType(int8) int8
 }
 
@@ -36,19 +36,21 @@ func SubmitProblem(ojType int, problemId string, language int8, code string, cal
 //we just try to login the account once as default now
 func submit(si SubmitInterface, accountInterface accounts.AccountInterface, problemId string, language int8, code string, callback func()) {
 	_, account := accountInterface.GetAvailableAccount()
-	if account.Session == "" {
+	if accounts.GetSessionByIndex(account.Index) == "" {
+		//login and update sessions
 		if err := accountInterface.LoginAccount(account); err != nil {
 			print("submit faild") //todo counts fail time
 			return //todo callback login error
 		}
 	}
-	if err := si.RemoteSubmit(account, problemId, language, code); err != nil {
+
+	if err := si.RemoteSubmit(accounts.GetSessionByIndex(account.Index), problemId, language, code); err != nil {
 		//todo login and try again
 		if err := accountInterface.LoginAccount(account); err != nil {
 			print("submit faild") //todo counts fail time
 			return //todo callback
 		}
-		if err := si.RemoteSubmit(account, problemId, language, code); err != nil {
+		if err := si.RemoteSubmit(accounts.GetSessionByIndex(account.Index), problemId, language, code); err != nil {
 			return //todo callback
 		}
 		return //todo callback success

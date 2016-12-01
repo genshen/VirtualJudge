@@ -14,6 +14,7 @@ type SubmitForm struct {
 	ProblemId int
 }
 
+//same to crawler.utils.values
 const (
 	LANG_C = iota
 	LANG_CPP
