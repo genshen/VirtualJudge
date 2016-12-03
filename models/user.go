@@ -6,7 +6,7 @@ import (
 )
 
 func init() {
-	orm.RegisterModel(new(User), new(Problem), new(ProblemDetail))
+	orm.RegisterModel(new(User), new(Problem), new(ProblemDetail), new(Submission))
 }
 
 const (

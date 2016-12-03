@@ -6,6 +6,8 @@ import (
 	"gensh.me/VirtualJudge/models/database"
 	"github.com/astaxie/beego/orm"
 	"gensh.me/VirtualJudge/components/crawler/submitter"
+	"log"
+	"time"
 )
 
 type SubmitForm struct {
@@ -44,17 +46,38 @@ func (s *SubmitForm)Valid() (response *utils.SimpleJsonResponse) {
 		//can remove this case.
 		response.Error = "inner serve error"
 	} else {
-		if err := submitter.SubmitProblem(int(problem.Oj), problem.OriginId, s.Language, s.Code, onSubmitResult); err != nil {
-			//has summit error,eg: network,error password
-			response.Error = err.Error()
+		o := orm.NewOrm()
+		o.Begin()
+		//todo public?
+		//todo source code decode and length
+		now := time.Now()
+		submission := models.Submission{ProblemId:s.ProblemId, OjType:problem.Oj, OriginId:problem.OriginId, Language:s.Language,
+			SourceCode:s.Code, CodeLength:0, Public:false, UserId:0, UserName:"", CreatedAt:now, UpdatedAt:now}
+		id, err := o.Insert(&submission)
+		if err != nil {
+			o.Rollback()
+			response.Error = "inner serve error"
+			return
 		} else {
-			//todo add submit to database
-			response.Status = 1
+			if err := submitter.SubmitProblem(int(id), int(problem.Oj), problem.OriginId, s.Language, s.Code, onSubmitResult); err != nil {
+				//has summit error,eg: network,error password
+				o.Rollback()
+				response.Error = err.Error()
+				return
+			} else {
+				response.Status = 1
+			}
 		}
+		o.Commit()
 	}
 	return
 }
 
-func onSubmitResult() {
+func onSubmitResult(localSubmissionId int, status *submitter.SubmitStatus, err error) {
+	if err == nil {
+		log.Print(localSubmissionId, status)
+	} else {
+		log.Println(err)
+	}
 	return
 }

@@ -1,29 +1,32 @@
 package submitter
 
 import (
-	"gensh.me/VirtualJudge/components/crawler/utils"
 	"net/http"
 	"errors"
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
+	"gensh.me/VirtualJudge/components/crawler/utils"
+	"github.com/astaxie/beego/httplib"
 )
 
 type POJSubmitInterface struct {
 
 }
 
-func (r POJSubmitInterface)RemoteSubmit(session string, problemId string, language int8, code string) error {
+func (p POJSubmitInterface)RemoteSubmit(session, username, problemId string, language int8, code string, ) (*SubmitStatus, error) {
 	client := &http.Client{}
 	values := url.Values{}
+	lang := strconv.Itoa(int(language))
 	values.Set("problem_id", problemId)
-	values.Set("language", strconv.Itoa(int(language)))
+	values.Set("language", lang)
 	values.Set("source", code)
 	values.Set("encoded", "1")
 
 	req, err := http.NewRequest("POST", "http://poj.org/submit", strings.NewReader(values.Encode()))
 	if err != nil {
-		return errors.New("error request")
+		return &SubmitStatus{}, errors.New("error submit request")
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Cookie", session)
@@ -31,15 +34,88 @@ func (r POJSubmitInterface)RemoteSubmit(session string, problemId string, langua
 	defer response.Body.Close()
 
 	if err != nil || response.StatusCode != 200 {
-		return errors.New("error request")
+		return &SubmitStatus{}, errors.New("error submit request")
 	}
-	return nil
+
+	queryUrl := "http://poj.org/status?problem_id=" + problemId + "&user_id=" + username + "&result=&language=" + lang
+	return p.queryStatus(queryUrl, time.Now()) //server submit time in [now-2sec,now-28sec] is legal
+}
+
+func (p *POJSubmitInterface) queryStatus(queryUrl string, timeBeforeSubmit time.Time) (*SubmitStatus, error) {
+	req := httplib.Get(queryUrl)
+	body, err := req.Bytes()
+	if err != nil {
+		return &SubmitStatus{}, errors.New("error status request")
+	}
+	start, length := 0, len(body)
+	var line string
+	for k, v := range body {
+		if v == '\n' {
+			if length - start >= 16 {
+				temp := string(body[start:start + 16])
+				if strings.HasPrefix(temp, "<tr align=center") {
+					line = string(body[start:k])
+					run_id, po := utils.FindMatchString(line, "", "<td>", "</td>")
+					if po != -1 && po < len(line) {
+						line = line[po:]
+					}
+
+					status, po := utils.FindMatchString(line, "color=", ">", "<")
+					if po != -1 && po < len(line) {
+						line = line[po:]
+					}
+
+					mem, po := utils.FindMatchString(line, "", "<td>", "<")
+					if po != -1 && po < len(line) {
+						line = line[po:]
+					}
+
+					execute_time, po := utils.FindMatchString(line, "", "<td>", "<")
+					if po != -1 && po < len(line) {
+						line = line[po:]
+					}
+
+					//language
+					_, po = utils.FindMatchString(line, "", "<td>", "<")
+					if po != -1 && po < len(line) {
+						line = line[po:]
+					}
+
+					_, po = utils.FindMatchString(line, "", "<td>", "<")
+					if po != -1 && po < len(line) {
+						line = line[po:]
+					}
+
+					date, po := utils.FindMatchString(line, "", "<td>", "<")
+					serverSubmitDate, err := time.ParseInLocation("2006-01-02 15:04:05", date,time.Local)
+					if po != -1 && err == nil {
+						tm2 := serverSubmitDate.Add(2 * time.Second)
+						println("")
+						if tm2.After(timeBeforeSubmit) &&tm2.Before(timeBeforeSubmit.Add(30 * time.Second)) {
+							return &SubmitStatus{RunId:run_id, Status:p.convertStatus(status), Memory:mem,
+								ExecuteTime:execute_time, SubmitDate:&serverSubmitDate}, nil
+						} else if (tm2.Before(timeBeforeSubmit) || tm2.Equal(timeBeforeSubmit)) {
+							return &SubmitStatus{}, errors.New("status not found")
+						}
+					}
+				}
+			}
+			start = k + 1
+		}
+	}
+	return &SubmitStatus{}, errors.New("status not found")
+}
+
+//todo
+func (p *POJSubmitInterface)convertStatus(status string) int8 {
+
+	return 0
 }
 
 //convert language type to poj language type
 //from
 //to 0:G++,1:GCC,2:JAVA,3:Pascal,4:C++,5:C,6:Fortran
-func (r POJSubmitInterface) GetLanguageType(language int8) int8 {
+func (p POJSubmitInterface) GetLanguageType(language int8) int8 {
 	switch language {
 	case utils.LANG_C:
 		return 5

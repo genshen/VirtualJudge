@@ -3,17 +3,27 @@ package submitter
 import (
 	"errors"
 	"gensh.me/VirtualJudge/components/crawler/accounts"
+	"time"
+	"log"
 )
 
 type SubmitInterface interface {
-	RemoteSubmit(session string, problemId string, language  int8, code  string) error
+	RemoteSubmit(session string, username, problemId string, language  int8, code  string) (*SubmitStatus, error)
 	GetLanguageType(int8) int8
+}
+
+type SubmitStatus struct {
+	RunId       string
+	Status      int8
+	Memory      string
+	ExecuteTime string
+	SubmitDate  *time.Time
 }
 
 //remember to follow the order in crawler/utils/values.go->const
 var submitInterfaces = []SubmitInterface{new(POJSubmitInterface)}
 
-func SubmitProblem(ojType int, problemId string, language int8, code string, callback func()) error {
+func SubmitProblem(localSubmissionId int, ojType int, problemId string, language int8, code string, callback func(int,*SubmitStatus, error)) error {
 	accountInterface, err := accounts.GetInterfaceByOjType(ojType)
 	if err != nil {
 		return err
@@ -24,7 +34,7 @@ func SubmitProblem(ojType int, problemId string, language int8, code string, cal
 		if l := si.GetLanguageType(language); l == -1 {
 			return errors.New("no such language")
 		} else {
-			go submit(si, accountInterface, problemId, l, code, callback)
+			go submit(si, accountInterface,localSubmissionId, problemId, l, code, callback)
 			return nil
 		}
 	} else {
@@ -34,27 +44,32 @@ func SubmitProblem(ojType int, problemId string, language int8, code string, cal
 
 //get available account and submit problem
 //we just try to login the account once as default now
-func submit(si SubmitInterface, accountInterface accounts.AccountInterface, problemId string, language int8, code string, callback func()) {
+func submit(si SubmitInterface, accountInterface accounts.AccountInterface,localSubmissionId int, problemId string, language int8, code string, callback func(int,*SubmitStatus, error)) {
 	_, account := accountInterface.GetAvailableAccount()
 	if accounts.GetSessionByIndex(account.Index) == "" {
 		//login and update sessions
 		if err := accountInterface.LoginAccount(account); err != nil {
-			print("submit faild") //todo counts fail time
-			return //todo callback login error
+			log.Println("login account faild while submitting solution") //todo counts fail time
+			callback(localSubmissionId,&SubmitStatus{}, err)
+			return
 		}
 	}
 
-	if err := si.RemoteSubmit(accounts.GetSessionByIndex(account.Index), problemId, language, code); err != nil {
+	if status, err := si.RemoteSubmit(accounts.GetSessionByIndex(account.Index), account.Username, problemId, language, code); err != nil {
 		//todo login and try again
+		//todo if err == notLogin ->try again
+		log.Println(err.Error())
 		if err := accountInterface.LoginAccount(account); err != nil {
-			print("submit faild") //todo counts fail time
-			return //todo callback
+			log.Println("login account faild while submitting solution") //todo counts fail time
+			callback(localSubmissionId,&SubmitStatus{}, err)
+			return
 		}
-		if err := si.RemoteSubmit(accounts.GetSessionByIndex(account.Index), problemId, language, code); err != nil {
-			return //todo callback
-		}
-		return //todo callback success
+		//if status, err := si.RemoteSubmit(accounts.GetSessionByIndex(account.Index), account.Username, problemId, language, code); err != nil {
+		//	log.Println(err.Error())
+		//	callback(localSubmissionId,status, nil)
+		//}
+	} else {
+		callback(localSubmissionId,status, nil)
 	}
-	return //todo callback
-	//account.Tasks++;
+	//todo account.Tasks++;
 }

@@ -77,7 +77,7 @@ func (p PojProblemCrawler)RequestProblem(problemId string) (*ProblemMeta, error)
 		s = s[po:]
 	}
 
-	hint, po := utils.FindMatchString(s, `Hint`, ">", "</div>")
+	hint, po := utils.FindMatchString(s, `Hint`, "\">", "</div>")
 	if po != -1 && po < len(s) {
 		problemMeta.Hint = hint
 		s = s[po:]

@@ -31,7 +31,7 @@ func (pi PojAccountInterface)LoginAccount(account *Account) error {
 		}
 		return errors.New("no SESSION_ID in Cookies")
 	}
-	return errors.New("error request")
+	return errors.New("error login request")
 }
 
 //make sure accountIndex is safe!
