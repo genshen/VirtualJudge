@@ -42,5 +42,5 @@ func (pi PojAccountInterface)LoginAccountByIndex(accountIndex uint) error {
 //todo select the minimal task account
 func (pi PojAccountInterface)GetAvailableAccount() (uint, *Account) {
 
-	return 0, &OJs[utils.POJ - 1].Accounts[0]
+	return utils.POJ - 1, &OJs[utils.POJ - 1].Accounts[0]
 }

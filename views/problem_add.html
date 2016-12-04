@@ -17,7 +17,7 @@
                 <h1>Add Problem</h1>
                 <div class="form-group">
                     <label for="oj-select">Email</label>
-                    <select id="oj-select" v-model="oj" class="custom-select">
+                    <select id="oj-select" v-model="oj_type" class="custom-select">
                         <option value="1">Poj</option>
                     </select>
                     <small id="ojHelp" class="form-text text-muted">select one oj.</small>
@@ -41,11 +41,11 @@
 <script>
     new Vue({
         el: "#app",
-        data: {oj: 1, problem_id: 1000},
+        data: {oj_type: 1, problem_id: 1000},
         methods: {
-            onSubmit: function () { //todo oj range?
-                if (this.oj > 0 && this.oj <= 1) {
-                    Util.postData.init("/problem/add/", {oj_type: this.oj, problem_id: this.problem_id},{multiError:false},function(){
+            onSubmit: function () { //todo oj_type range?
+                if (this.oj_type > 0 && this.oj_type <= 1) {
+                    Util.postData.init("/problem/add/", {oj_type: this.oj_type, problem_id: this.problem_id},{multiError:false},function(){
                         new Snackbar("Congratulations! problem added", {timeout:3500});
                     });
                 }else{

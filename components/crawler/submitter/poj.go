@@ -9,6 +9,7 @@ import (
 	"time"
 	"gensh.me/VirtualJudge/components/crawler/utils"
 	"github.com/astaxie/beego/httplib"
+	"gensh.me/VirtualJudge/components/crawler/status"
 )
 
 type POJSubmitInterface struct {
@@ -26,7 +27,7 @@ func (p POJSubmitInterface)RemoteSubmit(session, username, problemId string, lan
 
 	req, err := http.NewRequest("POST", "http://poj.org/submit", strings.NewReader(values.Encode()))
 	if err != nil {
-		return &SubmitStatus{}, errors.New("error submit request")
+		return &SubmitStatus{StatusCode:utils.STATUS_UNKNOWN_ERROR}, errors.New("error submit request")
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Cookie", session)
@@ -34,7 +35,7 @@ func (p POJSubmitInterface)RemoteSubmit(session, username, problemId string, lan
 	defer response.Body.Close()
 
 	if err != nil || response.StatusCode != 200 {
-		return &SubmitStatus{}, errors.New("error submit request")
+		return &SubmitStatus{StatusCode:utils.STATUS_UNKNOWN_ERROR}, errors.New("error submit request")
 	}
 
 	queryUrl := "http://poj.org/status?problem_id=" + problemId + "&user_id=" + username + "&result=&language=" + lang
@@ -45,7 +46,7 @@ func (p *POJSubmitInterface) queryStatus(queryUrl string, timeBeforeSubmit time.
 	req := httplib.Get(queryUrl)
 	body, err := req.Bytes()
 	if err != nil {
-		return &SubmitStatus{}, errors.New("error status request")
+		return &SubmitStatus{StatusCode:utils.STATUS_UNKNOWN_ERROR}, errors.New("error status request")
 	}
 	start, length := 0, len(body)
 	var line string
@@ -60,7 +61,7 @@ func (p *POJSubmitInterface) queryStatus(queryUrl string, timeBeforeSubmit time.
 						line = line[po:]
 					}
 
-					status, po := utils.FindMatchString(line, "color=", ">", "<")
+					s, po := utils.FindMatchString(line, "color=", ">", "<")
 					if po != -1 && po < len(line) {
 						line = line[po:]
 					}
@@ -87,15 +88,14 @@ func (p *POJSubmitInterface) queryStatus(queryUrl string, timeBeforeSubmit time.
 					}
 
 					date, po := utils.FindMatchString(line, "", "<td>", "<")
-					serverSubmitDate, err := time.ParseInLocation("2006-01-02 15:04:05", date,time.Local)
+					serverSubmitDate, err := time.ParseInLocation("2006-01-02 15:04:05", date, time.Local)
 					if po != -1 && err == nil {
 						tm2 := serverSubmitDate.Add(2 * time.Second)
-						println("")
 						if tm2.After(timeBeforeSubmit) &&tm2.Before(timeBeforeSubmit.Add(30 * time.Second)) {
-							return &SubmitStatus{RunId:run_id, Status:p.convertStatus(status), Memory:mem,
-								ExecuteTime:execute_time, SubmitDate:&serverSubmitDate}, nil
+							return &SubmitStatus{RunId:run_id, StatusCode:p.convertStatus(s), Memory:mem,
+								ExecuteTime:execute_time, SubmitTime:&serverSubmitDate}, nil
 						} else if (tm2.Before(timeBeforeSubmit) || tm2.Equal(timeBeforeSubmit)) {
-							return &SubmitStatus{}, errors.New("status not found")
+							return &SubmitStatus{StatusCode:utils.STATUS_KNOWN_ERROR}, errors.New("status not found")
 						}
 					}
 				}
@@ -103,13 +103,11 @@ func (p *POJSubmitInterface) queryStatus(queryUrl string, timeBeforeSubmit time.
 			start = k + 1
 		}
 	}
-	return &SubmitStatus{}, errors.New("status not found")
+	return &SubmitStatus{StatusCode:utils.STATUS_UNKNOWN_ERROR}, errors.New("status not found")
 }
 
-//todo
-func (p *POJSubmitInterface)convertStatus(status string) int8 {
-
-	return 0
+func (p *POJSubmitInterface)convertStatus(s string) int8 {
+	return status.GetStatusByOJType(utils.POJ - 1, s)
 }
 
 //convert language type to poj language type

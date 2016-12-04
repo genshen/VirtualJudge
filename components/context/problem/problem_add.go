@@ -28,14 +28,14 @@ func (p *ProblemAddMeta)ValidAndSave() (*utils.SimpleJsonResponse) {
 	}
 
 	//todo check problem exist
-	err = database.O.QueryTable(models.ProblemTableName).Filter("oj", p.Type).Filter("origin_id", p.ProblemId).One(&models.Problem{}, "id")
+	err = database.O.QueryTable(models.ProblemTableName).Filter("oj_type", p.Type).Filter("origin_id", p.ProblemId).One(&models.Problem{}, "id")
 	if err == orm.ErrNoRows {
 		//then  add this problem
 		o := orm.NewOrm()
 		o.Begin()
 		timeNow := time.Now()
 		prob := models.Problem{Title:pm.Title, Source:pm.Source, SourceUrl:pm.SourceUrl,
-			Oj:int8(ty), OriginUrl:pm.OriginUrl, OriginId:p.ProblemId,
+			OjType:int8(ty), OriginUrl:pm.OriginUrl, OriginId:p.ProblemId,
 			MemLimit:pm.MemLimit, TimeLimit:pm.TimeLimit, CreatedAt:timeNow, UpdatedAt:timeNow}
 		_, err = o.Insert(&prob)
 		if err != nil {

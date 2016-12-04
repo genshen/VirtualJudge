@@ -39,8 +39,8 @@ func (c *AuthController) GithubCallback() {
 			if err == nil {
 				user = u
 				user.Status = auth.UserStatusAuthOK
-				c.loginUser(user)
 				users.CreateUser(user,auth.Github)
+				c.loginUser(user)
 			}
 		}
 	}
@@ -49,7 +49,7 @@ func (c *AuthController) GithubCallback() {
 	c.TplName = "auth_callback.html"
 }
 
-func (this *AuthController)loginUser(u *auth.User) {
-	this.SetSession(UserData, *u)
-	this.SetSession(IsAuth, true)
+func (c *AuthController)loginUser(u *auth.User) {
+	c.SetSession(UserData, *u)
+	c.SetSession(IsAuth, true)
 }

@@ -92,11 +92,11 @@ var ProblemDetail = Vue.extend({
     methods: {},
     computed: {
         ojName: function () {
-            return getOJNameByType(this.detail.oj);
+            return getOJNameByType(this.detail.oj_type);
         }, formatUpdatedAt: function () {
             return formatTime(this.detail.updated_at);
         }, sourceUrl: function () {
-            return formatSourceUrl(this.detail.oj, this.detail.source_url);
+            return formatSourceUrl(this.detail.oj_type, this.detail.source_url);
         }
     },
     data: function () {
@@ -113,7 +113,7 @@ var ProblemDetail = Vue.extend({
                     try {
                         this.detail = data;
                         /*"id","problem_id","title","describe","hint","input","input_sample", "output","output_sample",
-                         "ac_count","submitted_count","mem_limit","time_limit","oj","origin_id","origin_url",
+                         "ac_count","submitted_count","mem_limit","time_limit","oj_type","origin_id","origin_url",
                          "source","source_url","created_at","updated_at":*/
                         this.loading_status = 1;
                     } catch (e) {
@@ -151,7 +151,13 @@ var Submit = Vue.extend({
             },{multiError:false},function(data){
                 new Snackbar("source code submitted,waiting for judge.", {timeout: 3500});
                 self.code = "";
-            },null,null,null,function(){//submitted but error
+            },function(){
+                new Snackbar("Please sign in first", {timeout: 3500});
+                self.user.name = "Unknown";
+                self.user.id = 0;
+                self.user.avatar = "";
+                self.user.is_login = false;
+            },null,null,function(){//submitted but error
                 self.submit_status = 1;
             });
 
@@ -233,7 +239,7 @@ window.addEventListener('message', function (e) {
             userInfo.id = data.id;
             userInfo.avatar = data.avatar;
             userInfo.is_login = true;
-            new Snackbar("登录认证成功", {timeout: 3500});
+            new Snackbar("Sign in successfully", {timeout: 3500});
             if(app.$refs.app.onLoginSuccess){ //callback
                 app.$refs.app.onLoginSuccess()
             }

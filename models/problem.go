@@ -12,7 +12,7 @@ type Problem struct {
 	ProblemDetail  *ProblemDetail     `orm:"reverse(one)" json:"problem_detail"`
 	Title          string             `json:"title"`
 	OriginUrl      string             `json:"origin_url"`
-	Oj             int8               `json:"oj"`
+	OjType         int8               `json:"oj_type"`
 	OriginId       string             `json:"origin_id"`
 	MemLimit       string             `json:"men_limit"`
 	TimeLimit      string             `json:"time_limit"`

@@ -145,7 +145,7 @@
                         <tbody v-if="problems.length">
                         <tr v-for="(problem,index) in problems">
                             <td v-text="index"></td>
-                            <td v-text="OJName(problem.oj)">Column content</td>
+                            <td v-text="OJName(problem.oj_type)">Column content</td>
                             <td v-text="problem.origin_id"></td>
                             <td>
                                 <router-link :to="{ name: 'detail',params:{id:problem.id}}"
@@ -153,7 +153,7 @@
                             </td>
                             <td v-text="problem.ac_count+'/'+problem.submitted_count"></td>
                             <td>
-                                <a :href="sourceUrl(problem.oj,problem.source_url)" v-text="problem.source"
+                                <a :href="sourceUrl(problem.oj_type,problem.source_url)" v-text="problem.source"
                                    target="_blank"></a>
                             </td>
                             <td v-text="formatUpdatedAt(problem.updated_at)"></td>
