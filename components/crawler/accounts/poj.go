@@ -24,7 +24,7 @@ func (pi PojAccountInterface)LoginAccount(account *Account) error {
 
 	if err == nil && response.StatusCode == 302 {
 		for _, cookie := range response.Cookies() {
-			if cookie.Name == "JSESSIONID" {
+			if cookie.Name == "JSESSIONID" && cookie.Value != "" {
 				UpdateSessionByIndex(account.Index, "JSESSIONID=" + cookie.Value)
 				return nil
 			}

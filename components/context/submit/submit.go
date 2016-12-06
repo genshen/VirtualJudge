@@ -3,16 +3,13 @@ package submit
 import (
 	"time"
 	"encoding/base64"
-	"gensh.me/VirtualJudge/components/utils"
+	"github.com/astaxie/beego/orm"
 	"gensh.me/VirtualJudge/models"
 	"gensh.me/VirtualJudge/models/database"
-	"github.com/astaxie/beego/orm"
+	"gensh.me/VirtualJudge/components/utils"
 	"gensh.me/VirtualJudge/components/crawler/submitter"
 	u "gensh.me/VirtualJudge/components/crawler/utils"
-	"log"
 )
-
-const DATETIME_LAYOUT = "2006-01-02 15:04:05"
 
 type SubmitForm struct {
 	Code      string
@@ -62,7 +59,7 @@ func (s *SubmitForm)Valid(userId int, username string) (response *utils.SimpleJs
 			response.Error = "inner serve error"
 			return
 		} else {
-			if err := submitter.SubmitProblem(int(id), int(problem.OjType), problem.OriginId, s.Language, s.Code, onSubmitResult); err != nil {
+			if err := submitter.SubmitProblem(int(id), int(problem.OjType), problem.OriginId, s.Language, s.Code); err != nil {
 				//has summit error,eg: network,error password
 				o.Rollback()
 				response.Error = err.Error()
@@ -74,49 +71,4 @@ func (s *SubmitForm)Valid(userId int, username string) (response *utils.SimpleJs
 		o.Commit()
 	}
 	return
-}
-
-//todo normal all errors
-func onSubmitResult(localSubmissionId int, ojType int, accountIndex uint, accountUsername string, status *submitter.SubmitStatus, err error) {
-	var errText = ""
-	if err != nil {
-		errText = err.Error()
-	}
-
-	switch {
-	case status.StatusCode == 0 || status.StatusCode < u.STATUS_DIV_ERROR:
-		fallthrough
-	case status.StatusCode < u.STATUS_DIV_LOCAL:
-		log.Println("error:", errText)
-		log.Println("error submit sulotion to remote OJ,local RunId:", localSubmissionId)
-		_, err := database.O.Raw("UPDATE submission SET status_code = ? , updated_at = ? , error_detail = ? WHERE id = ?",
-			status.StatusCode, time.Now().Format(DATETIME_LAYOUT), errText, localSubmissionId).Exec()
-		if err != nil {
-			log.Println("error write to database in onSubmitResult local RunId:", localSubmissionId)
-			return
-		}
-	case status.StatusCode < u.STATUS_DIV_REMOTE_PENDING:
-		_, err := database.O.Raw("UPDATE submission SET status_code = ? , origin_run_id = ? , origin_account_id = ? , " +
-			"query_count = ? , origin_submit_time = ?, updated_at = ?  WHERE id = ?",
-			status.StatusCode, status.RunId, accountUsername,1, status.SubmitTime.Format(DATETIME_LAYOUT),
-			time.Now().Format(DATETIME_LAYOUT), localSubmissionId).Exec()
-		if err != nil {
-			log.Println("error write to database in onSubmitResult local RunId:", localSubmissionId)
-			return
-		}
-		log.Println("successfully submit to remote OJ (will query remote status later),local RunId:", localSubmissionId)
-	//todo add to queue
-
-	case status.StatusCode < u.STATUS_DIV_END: //task finished and add to database
-		_, err := database.O.Raw("UPDATE submission SET status_code = ? , execute_time = ? , memory = ? , origin_run_id = ? , " +
-			"origin_account_id = ? , query_count = ? , origin_submit_time = ? ,updated_at = ?  WHERE id = ?",
-			status.StatusCode, status.ExecuteTime, status.Memory, status.RunId, accountUsername,1,
-			status.SubmitTime.Format(DATETIME_LAYOUT), time.Now().Format(DATETIME_LAYOUT), localSubmissionId).Exec()
-		if err != nil {
-			log.Println("error write to database in onSubmitResult,local RunId:", localSubmissionId)
-			return
-		}
-		log.Println("successfully submit to remote OJ,local RunId:", localSubmissionId)
-	}
-	//todo update query time
 }

@@ -17,4 +17,8 @@ func init() {
 	beego.Router("/problem/add", &controllers.ProblemController{}, "get,post:AddProblem")
 
 	beego.Router("/submit", &controllers.SubmitController{}, "post:Submit")
+
+	beego.Router("/status", &controllers.StatusController{}, "get:Status")
+	beego.Router("/status/ws", &controllers.StatusController{}, "get:WebSocket")
+	beego.Router("/status/test", &controllers.StatusController{}, "get:Test")
 }

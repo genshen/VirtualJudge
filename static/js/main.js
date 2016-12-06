@@ -132,38 +132,38 @@ var ProblemDetail = Vue.extend({
 });
 
 var Submit = Vue.extend({
-    template:"#template-problem-submit",
-    data:function(){
-        return {summary: {},language:0,code:"",submit_status:1,user:userInfo};
+    template: "#template-problem-submit",
+    data: function () {
+        return {summary: {}, language: 0, code: "", submit_status: 1, user: userInfo};
     },
     methods: {
-        onLoginSuccess:function(){
+        onLoginSuccess: function () {
             console.log("Success");
-        },submit:function () {
-            if(!this.code){
+        }, submit: function () {
+            if (!this.code) {
                 new Snackbar("source code can not be blank.", {timeout: 3500});
                 return;
             }
             this.submit_status = 0; //submitting
             var self = this;
-            Util.postData.init(Config.base+"submit",{
-                code:Base64.encode(this.code),language:this.language,problem_id:this.$route.params.id
-            },{multiError:false},function(data){
+            Util.postData.init(Config.base + "submit", {
+                code: Base64.encode(this.code), language: this.language, problem_id: this.$route.params.id
+            }, {multiError: false}, function (data) {
                 new Snackbar("source code submitted,waiting for judge.", {timeout: 3500});
                 self.code = "";
-            },function(){
+                self.$router.push({name: 'status'});
+            }, function () {
                 new Snackbar("Please sign in first", {timeout: 3500});
                 self.user.name = "Unknown";
                 self.user.id = 0;
                 self.user.avatar = "";
                 self.user.is_login = false;
-            },null,null,function(){//submitted but error
+            }, null, null, function () {//submitted but error
                 self.submit_status = 1;
             });
-
         }
-    }, mounted:function () {
-    },created: function () {
+    }, mounted: function () {
+    }, created: function () {
         var id = this.$route.params.id;
         this.summary.id = id;
         $.ajax({
@@ -184,13 +184,35 @@ var Submit = Vue.extend({
     }
 });
 
+var Status = Vue.extend({
+    template: "#template-status",
+    data: function () {
+        return {summary: {}, language: 0, code: "", submit_status: 1, user: userInfo};
+    },
+    methods: {},
+    mounted: function () {
+        //todo init once
+        var socket = new WebSocket('ws://' + window.location.host + Config.base + 'status/ws');
+        socket.onmessage = function (event) {
+            try{
+                var data = JSON.parse(event.data);
+                console.log(data);
+            }catch (e){
+
+            }
+
+        };
+    }
+});
+
 const router = new VueRouter({
     base: Config.base,
     routes: [
         {path: '/', name: 'home', component: Home},
         {path: '/problems', name: 'problems', component: Problems},
         {path: '/problem/:id', name: 'detail', component: ProblemDetail},
-        {path: '/submit/:id', name: 'submit', component: Submit}
+        {path: '/submit/:id', name: 'submit', component: Submit},
+        {path: '/status', name: 'status', component: Status}
     ]
 });
 
@@ -240,7 +262,7 @@ window.addEventListener('message', function (e) {
             userInfo.avatar = data.avatar;
             userInfo.is_login = true;
             new Snackbar("Sign in successfully", {timeout: 3500});
-            if(app.$refs.app.onLoginSuccess){ //callback
+            if (app.$refs.app.onLoginSuccess) { //callback
                 app.$refs.app.onLoginSuccess()
             }
         }

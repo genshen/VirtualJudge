@@ -27,7 +27,7 @@
                     <router-link :to="{ name: 'problems'}" class="nav-link">Problems</router-link>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Status</a>
+                    <router-link :to="{ name: 'status'}" class="nav-link">Status</router-link>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">Contest</a>
@@ -245,8 +245,8 @@
         <div v-if="user.is_login" class="row padding-container">
             <div class="col-md-7 offset-md-1">
                 <div class="form-group">
-                    <label for="exampleSelect1">Language</label>
-                    <select v-model="language" class="form-control" id="exampleSelect1">
+                    <label for="submit-lang-select">Language</label>
+                    <select v-model="language" class="form-control" id="submit-lang-select">
                         <option value="0">C</option>
                         <option value="1">C++</option>
                         <option value="2">Java</option>
@@ -285,6 +285,15 @@
                 <a href="javascript:void(0)" data-toggle="modal" data-target="#sign-in-modal">Login</a>
             </div>
         </div>
+    </div>
+</script>
+<script type="text/x-template" id="template-status">
+    <div class="container">
+        <div class="row padding-container">
+            <div class="col-md-10 offset-md-1">
+                b
+            </div>
+        </div> <!---/row--->
     </div>
 </script>
 <script src="/static/dist/js/jquery.min.js"></script>
